@@ -166,7 +166,8 @@ void Queue::DeInit() {
 std::string Queue::GetDesc() const {
   const struct llring *ring = queue_;
 
-  return bess::utils::Format("%u/%u", llring_count(ring), ring->common.slots);
+  return bess::utils::Format("%u/%u drop %lu, max %u",
+							 llring_count(ring), ring->common.slots, stats_.dropped, stats_.max_queued);
 }
 
 /* from upstream */
@@ -178,6 +179,11 @@ void Queue::ProcessBatch(Context *, bess::PacketBatch *batch) {
   }
 
   stats_.enqueued += queued;
+  const struct llring *ring = queue_;
+  uint32_t queuelen = llring_count(ring);
+  if (queuelen > stats_.max_queued) {
+	  stats_.max_queued = queuelen;
+  }
 
   if (queued < batch->cnt()) {
     int to_drop = batch->cnt() - queued;

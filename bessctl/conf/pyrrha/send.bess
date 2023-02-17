@@ -1,0 +1,36 @@
+import scapy.all as scapy
+import fg_config as config
+from fg_config import add_bw_limit
+
+# p0 = PMDPort(pci='82:00.1')  
+
+# pin0::PortInc(port=p0)
+# po0::PortOut(port=p0)
+
+myport::PMDPort(port_id=1, num_inc_q=4, num_out_q=4)
+#input0::QueueInc(port=myport, qid=0) #This module will read from myport on queue 0
+#input1::QueueInc(port=myport, qid=1) #This module will read from myport on queue 1
+output0::QueueOut(port=myport, qid=0) #This module will write to myport on queue 0
+output1::QueueOut(port=myport, qid=1) #This module will write to myport on queue 1
+
+host0::Endhost(is_sender = True)
+host0.config_sender(
+    flowfile = config.sender_flowfile[0],
+    sender_id = 0,
+    inflight_limit = config.sender_win_size,
+    window_increase_rate = config.sender_win_increase,
+    burst = config.sender_burst,
+    templ = config.sender_template,
+    eid2ips = config.sender_eid2ips,
+)
+
+#add_bw_limit(bess, host0, 100 , wid=0, coreid=25)
+
+bess.add_worker(1, 27)
+bess.add_worker(2, 29)
+# pin0.attach_task(wid=1)
+host0.attach_task(wid=2)
+
+# pin0 -> host0 -> po0
+
+input0 ->host0 ->output0

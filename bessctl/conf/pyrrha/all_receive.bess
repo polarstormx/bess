@@ -1,0 +1,16 @@
+import time
+bess.add_worker(0,25)
+bess.add_worker(1,27)
+bess.add_worker(2,29)
+
+
+myport::PMDPort(port_id=0, num_inc_q=1, num_out_q=1)
+input0::QueueInc(port=myport, qid=0) #This module will read from myport on queue 0
+# output0::QueueOut(port=myport, qid=0) #This module will write to myport on queue 0
+
+
+# p = PMDPort(pci='82:00.0')
+# pin::PortInc(port=p)
+# pout::PortOut(port=p)
+
+input0 -> Throughput(trigger_cycle=200)

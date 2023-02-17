@@ -30,6 +30,8 @@
 #ifndef BESS_UTILS_UDP_H_
 #define BESS_UTILS_UDP_H_
 
+#define ROCEV2_UDP_PORT 4791
+
 namespace bess {
 namespace utils {
 

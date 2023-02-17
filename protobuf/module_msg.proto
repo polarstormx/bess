@@ -1189,7 +1189,7 @@ message MplsPopArg {
 }
 
 /**
- * WorkerSplit splits packets based on the worker calling ProcessBatch(). It has
+ * WorkerSplit splits packets based on the worker calling ProcessBatch(). It hasVPortArg 
  * two modes.
  * 1) Packets from worker `x` are mapped to output gate `x`. This is the default
  *    mode.
@@ -1205,4 +1205,60 @@ message MplsPopArg {
  */
 message WorkerSplitArg {
   map<uint32, uint32> worker_gates = 1; // ogate -> worker mask
+}
+
+
+/**
+* Floodgate Args
+* Author: Pavinberg
+* date: 2021/08/10
+*/
+
+message FloodgateSwitchArg {
+  uint32 queue_size = 1; /// pre-allocate VOQ queue size
+  uint32 voqs_num = 2; /// how many VOQs pre-allocated
+  uint32 ports_num = 3; /// how many ports this switch has
+  uint32 credit_limit = 4; /// credit limit of CreditAccumulator
+  uint64 ca_timeout = 5; // credit accumulator timeout
+  uint32 voq_resume_lim = 6; // VOQ length limitation to resume sending credit ACk
+  bytes templ = 7; /// a template used to generate switch ACK
+  bool prefetch = 8; /// When prefetch is enabled, the module will perform CPU prefetch on the first 64B of each packet onto CPU L1 cache. Default value is false
+  uint32 burst = 9;  /// how many packets a batch has
+  bool enable_floodgate = 10; /// whether enable Floodgate window restriction
+}
+
+message FloodgateSwitchCommandAddRoutesArg {
+  message RouteField {
+    string network = 1;  /// network address e.g. "192.168.1.0/24"
+	uint32 port = 2;  /// port to route to
+  }
+  repeated RouteField routes = 1;  // routes to be added to switch
+}
+
+message FloodgateSwitchCommandConfigOPortArg {
+  uint32 port = 1; /// port index to be configured
+  uint32 m = 2; /// a parameter of Floodgate
+  uint32 bdpi = 3; /// BDP of this port
+  uint32 ecn_kmax = 4; /// KMAX of ECN
+  uint32 ecn_kmin = 5; /// KMIN of ECN
+  string mac = 6; /// MAC address on the other end to this port
+  bool edge = 7; /// whether this port is the edge of FloodgateSwitch cluster, e.g. connected to a host
+}
+
+message EndhostArg {
+  bool is_sender = 1; // whether this Endhost will send packets
+}
+
+message EndhostCommandConfigSenderArg {
+  message EidIp {
+    uint32 eid = 1; /// ndhost ID in flow file
+	string ip = 2; /// IP of this ID
+  }
+  string flowfile = 1; /// flow cdf filename
+  uint32 sender_id = 2; /// this Endhost's ID in flowfile
+  uint32 inflight_limit = 3; // sending window size
+  uint32 window_increase_rate = 4; // window increase rate
+  uint32 burst = 5; /// how many packets a batch sends out
+  bytes templ = 6; /// a template used to generate packet
+  repeated EidIp eid2ips = 7; // a map from ID to IP address
 }

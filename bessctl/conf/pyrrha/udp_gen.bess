@@ -1,0 +1,87 @@
+import scapy.all as scapy
+import time
+
+# 'show module' command shows detailed stats/parameters
+myport::PMDPort(port_id=1, num_inc_q=4, num_out_q=8)
+#input0::QueueInc(port=myport, qid=0) #This module will read from myport on queue 0
+#input1::QueueInc(port=myport, qid=1) #This module will read from myport on queue 1
+output0::QueueOut(port=myport, qid=0) #This module will write to myport on queue 0
+output1::QueueOut(port=myport, qid=1) #This module will write to myport on queue 1
+output2::QueueOut(port=myport, qid=2) #This module will write to myport on queue 0
+output3::QueueOut(port=myport, qid=3) #This module will write to myport on queue 1
+output4::QueueOut(port=myport, qid=4) #This module will write to myport on queue 0
+output5::QueueOut(port=myport, qid=5) #This module will write to myport on queue 1
+output6::QueueOut(port=myport, qid=6) #This module will write to myport on queue 0
+output7::QueueOut(port=myport, qid=7) #This module will write to myport on queue 1
+pkt_size = 1500
+assert(60 <= pkt_size <= 1522)
+
+# p0 = PMDPort(pci='82:00.1')  
+
+# pin0::PortInc(port=p0)
+# po0::PortOut(port=p0)
+
+eth = scapy.Ether(src='ec:0d:9a:bf:dc:b5', dst='ec:0d:9a:a4:19:0f')
+ip = scapy.IP(src='172.16.100.6', dst='172.16.100.19')
+tcp = scapy.TCP(sport=10008, dport=10002)
+payload = ('hello' + '0123456789' * 200)[:pkt_size-len(eth/ip/tcp)]
+pkt = eth/ip/tcp/payload
+pkt_data = bytes(pkt)
+
+
+
+bess.add_worker(1, 27)
+bess.add_worker(2, 29)
+bess.add_worker(3, 31)
+bess.add_worker(4, 33)
+bess.add_worker(5, 35)
+bess.add_worker(6, 37)
+bess.add_worker(7, 39)
+bess.add_worker(8, 41)
+
+
+s1::Source(pkt_size=pkt_size) -> Rewrite(templates=[pkt_data]) -> Buffer() -> output0
+s2::Source(pkt_size=pkt_size) -> Rewrite(templates=[pkt_data]) -> Buffer() ->output1
+s3::Source(pkt_size=pkt_size) -> Rewrite(templates=[pkt_data]) -> Buffer() -> output2
+s4::Source(pkt_size=pkt_size) -> Rewrite(templates=[pkt_data]) -> Buffer() ->output3
+s5::Source(pkt_size=pkt_size) -> Rewrite(templates=[pkt_data]) -> Buffer() -> output4
+s6::Source(pkt_size=pkt_size) -> Rewrite(templates=[pkt_data]) -> Buffer() ->output5
+s7::Source(pkt_size=pkt_size) -> Rewrite(templates=[pkt_data]) -> Buffer() -> output6
+s8::Source(pkt_size=pkt_size) -> Rewrite(templates=[pkt_data]) -> Buffer() ->output7
+bess.add_tc('pktgen1', policy='rate_limit',
+            resource='bit', limit={'bit': int(1.25e10)})
+bess.add_tc('pktgen2', policy='rate_limit',
+            resource='bit', limit={'bit': int(1.25e10)})
+bess.add_tc('pktgen3', policy='rate_limit',
+            resource='bit', limit={'bit': int(1.25e10)})
+bess.add_tc('pktgen4', policy='rate_limit',
+            resource='bit', limit={'bit': int(1.25e10)})
+bess.add_tc('pktgen5', policy='rate_limit',
+            resource='bit', limit={'bit': int(1.25e10)})
+bess.add_tc('pktgen6', policy='rate_limit',
+            resource='bit', limit={'bit': int(1.25e10)})
+bess.add_tc('pktgen7', policy='rate_limit',
+            resource='bit', limit={'bit': int(1.25e10)})
+bess.add_tc('pktgen8', policy='rate_limit',
+            resource='bit', limit={'bit': int(1.25e10)})
+
+s1.attach_task(parent='pktgen1')
+s2.attach_task(parent='pktgen2')
+s3.attach_task(parent='pktgen3')
+s4.attach_task(parent='pktgen4')
+s5.attach_task(parent='pktgen5')
+s6.attach_task(parent='pktgen6')
+s7.attach_task(parent='pktgen7')
+s8.attach_task(parent='pktgen8')
+
+bess.pause_all()
+
+#time.sleep(7)
+time.sleep(4)
+bess.resume_all()
+
+
+#time.sleep(6)
+time.sleep(9)
+
+bess.reset_all()

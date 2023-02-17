@@ -35,7 +35,7 @@ import string
 
 from socket import inet_aton as aton
 
-NUM_VMS = int($BESS_VMS!'1')
+NUM_VMS = int($BESS_VMS!'2')
 NUM_VPORTS = int($BESS_PORTS!'2')
 NUM_QUEUES = int($BESS_QUEUES!'1')
 

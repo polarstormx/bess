@@ -1,0 +1,56 @@
+import scapy.all as scapy
+import time
+
+bess.add_worker(0,25)
+bess.add_worker(1,27)
+bess.add_worker(2,29)
+
+p = PMDPort(pci='82:00.1')
+pin::PortInc(port=p)
+pout::PortOut(port=p)
+
+#recv::Endhost(is_sender = False)
+#pin -> recv ->pout
+eth = scapy.Ether(src="ec:0d:9a:a4:19:0f",dst="ec:0d:9a:bf:dc:b5")
+ip = scapy.IP(src='172.16.100.10', dst='172.16.100.3')
+udp = scapy.UDP()
+pkt = bytes(eth/ip/udp)
+#pin -> t::Timestamp()->MACSwap() -> IPSwap()-> m::Measure(latency_ns_resolution=100)-> pout
+pin -> MACSwap() -> IPSwap()-> pout
+# start_time = time.time()
+# last_time = start_time
+
+# bess.resume_all()
+
+# print('{} RTT (us)                             '.format(' ' * 41), end='')
+# print('   jitter (us)')
+# print('{}    avg    min    50%    99%      max '.format(' ' * 41), end='')
+# print('      avg    min    50%    99%      max')
+
+# while True:
+#     time.sleep(1)
+
+#     #get_summary() doesn't require workers to be stopped
+#     ret = m.get_summary(clear=True,  # reset stats every interval
+#                         latency_percentiles=[50, 99],
+#                         jitter_percentiles=[50, 99])
+
+#     diff_ts = ret.timestamp - last_time
+#     diff_pkts = ret.packets / diff_ts
+#     diff_bits = ret.bits / diff_ts
+#     last_time = ret.timestamp
+#     print('%12.6f: %5.3f Mpps, %8.3f Mbps, ' \
+#           '%7.3f %6.1f %6.1f %6.1f %8.1f   %7.3f %6.1f %6.1f %6.1f %8.1f' %
+#           (ret.timestamp - start_time,
+#            diff_pkts / 1e6,
+#            diff_bits / 1e6,
+#            ret.latency.avg_ns / 1e3,
+#            ret.latency.min_ns / 1e3,
+#            ret.latency.percentile_values_ns[0] / 1e3,
+#            ret.latency.percentile_values_ns[1] / 1e3,
+#            ret.latency.max_ns / 1e3,
+#            ret.jitter.avg_ns / 1e3,
+#            ret.jitter.min_ns / 1e3,
+#            ret.jitter.percentile_values_ns[0] / 1e3,
+#            ret.jitter.percentile_values_ns[1] / 1e3,
+#            ret.jitter.max_ns / 1e3))

@@ -1,0 +1,10 @@
+bess.add_worker(0,25)
+bess.add_worker(1,27)
+bess.add_worker(2,29)
+
+p = PMDPort(pci='82:00.0')
+pin::PortInc(port=p)
+pout::PortOut(port=p)
+
+recv::Endhost(is_sender = False)
+pin -> recv ->pout

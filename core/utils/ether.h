@@ -97,6 +97,10 @@ struct [[gnu::packed]] Ethernet {
       return false;
     }
 
+	inline void fromBytes(uint8_t mac[kSize]) {
+		for (uint32_t i = 0; i < kSize; i++) bytes[i] = mac[i];
+	}
+
     uint8_t bytes[kSize];
   };
 

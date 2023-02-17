@@ -107,6 +107,7 @@ class Queue : public Module {
     uint64_t enqueued;
     uint64_t dequeued;
     uint64_t dropped;
+	  uint32_t max_queued;
   } stats_;
 
   bess::pb::QueueArg init_arg_;

@@ -1,0 +1,52 @@
+import scapy.all as scapy
+
+# cores = range(25,29)
+# for core in cores:
+#    bess.add_worker(core, core)
+# # 'show module' command shows detailed stats/parameters
+myport::PMDPort(port_id=1, num_inc_q=4, num_out_q=4)
+#input0::QueueInc(port=myport, qid=0) #This module will read from myport on queue 0
+#input1::QueueInc(port=myport, qid=1) #This module will read from myport on queue 1
+output0::QueueOut(port=myport, qid=0) #This module will write to myport on queue 0
+# output1::QueueOut(port=myport, qid=1) #This module will write to myport on queue 1
+# output3::QueueOut(port=myport, qid=2) #This module will write to myport on queue 0
+# output4::QueueOut(port=myport, qid=3) #This module will write to myport on queue 1
+pkt_size = int($BESS_PKT_SIZE!'60')
+assert(60 <= pkt_size <= 1522)
+
+# p0 = PMDPort(pci='82:00.1')  
+
+# pin0::PortInc(port=p0)
+# po0::PortOut(port=p0)
+
+eth = scapy.Ether(src='ec:0d:9a:bf:dc:b5', dst='ec:0d:9a:bf:d9:2c')
+ip = scapy.IP(src='172.16.100.7', dst='172.16.100.20')   # dst IP is overwritten
+tcp = scapy.TCP(sport=10001, dport=10002)
+payload = ('hello' + '0123456789' * 200)[:pkt_size-len(eth/ip/tcp)]
+pkt = eth/ip/tcp/payload
+pkt_data = bytes(pkt)
+
+
+
+# NOTE: without quick_rampup=1, it takes a while to converge to
+# the desied load level, especially when flow duration is pareto distribution
+
+# FG::FlowGen(template=pkt_data, pps=1e7, flow_rate = 1e4, flow_duration = 100.0, \
+#         arrival='exponential', duration='pareto', quick_rampup=True) 
+
+bess.add_worker(1, 27)
+bess.add_worker(2, 29)
+# FG.attach_task(wid=1)     
+# FG -> output0
+# FlowGen(template=pkt_data, pps=1e7, flow_rate = 1e3, flow_duration = 100.0, \
+#         arrival='exponential', duration='pareto', quick_rampup=True) -> output1
+# FlowGen(template=pkt_data, pps=1e7, flow_rate = 1e3, flow_duration = 100.0, \
+#        arrival='exponential', duration='pareto', quick_rampup=True) -> output3
+# FlowGen(template=pkt_data, pps=1e7, flow_rate = 1e3, flow_duration = 100.0, \
+#         arrival='exponential', duration='pareto', quick_rampup=True) -> output4
+
+# Source() -> Rewrite(templates=[pkt_data]) -> po0
+pkt_src = FlowGen(template = pkt_data, pps = 1e7, flow_rate = 1e4, flow_duration = 100.0, \
+        arrival = 'uniform', duration='uniform', quick_rampup = True)
+
+pkt_src -> IPChecksum() -> output0
